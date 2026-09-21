@@ -1,1 +1,1 @@
-Progetto fatto da me (e claude)
+Progetto di Ingegneria del Software, Univr, Informatica

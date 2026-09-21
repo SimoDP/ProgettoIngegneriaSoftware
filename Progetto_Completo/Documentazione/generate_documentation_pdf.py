@@ -252,7 +252,7 @@ def create_documentation_pdf(output_pdf_path, allegati_dir):
     story.append(Spacer(1, 40))
     story.append(Paragraph("UNIVERSITÀ DEGLI STUDI DI VERONA", ParagraphStyle('UniHeader', parent=style_cover_sub, fontName='Helvetica-Bold', fontSize=14, leading=18, textColor=c_primary)))
     story.append(Paragraph("Dipartimento di Informatica — Corso di Ingegneria del Software", style_cover_sub))
-    story.append(Paragraph("Anno Accademico 2024 / 2025 – 2025 / 2026", style_cover_meta))
+    story.append(Paragraph("Anno Accademico 2025 / 2026", style_cover_meta))
     story.append(Spacer(1, 30))
 
     story.append(HRFlowable(width="80%", thickness=2, color=c_primary, spaceBefore=5, spaceAfter=25))
@@ -269,7 +269,7 @@ def create_documentation_pdf(output_pdf_path, allegati_dir):
 
     # Box Autore e Specifiche
     info_data = [
-        [Paragraph("<b>Autore / Candidato:</b>", style_table_cell), Paragraph("Simone Dal Prete", style_table_cell_bold)],
+        [Paragraph("<b>Autore / Candidato:</b>", style_table_cell), Paragraph("Simone Dal Prete, Pawanjot Singh, Davide Garbelli", style_table_cell_bold)],
         [Paragraph("<b>Traccia Assegnata:</b>", style_table_cell), Paragraph("Esercizio / Progetto 2 — Servizio Clinico per Diabete di Tipo 2", style_table_cell)],
         [Paragraph("<b>Curriculum / Indirizzo:</b>", style_table_cell), Paragraph("Sviluppo di Sistemi Software Orientato ai Dati (Bioinformatica)", style_table_cell)],
         [Paragraph("<b>Stack Implementativo:</b>", style_table_cell), Paragraph("Python 3.11, Flask 3.0, SQLite3 (Raw SQL / No ORM), Bootstrap 5", style_table_cell)],
