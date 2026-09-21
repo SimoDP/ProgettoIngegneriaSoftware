@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Registra Rilevazione Glicemica - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-droplet-half me-2"></i>Nuova Rilevazione Glicemica</h3>
+                <small class="text-white-50">Inserisci i dettagli del controllo glicemico effettuato</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('patient.add_measurement') }}">
+                    <!-- Glucose Value -->
+                    <div class="mb-4">
+                        <label for="glucose_level" class="form-label fw-bold fs-5">
+                            Valore Glicemico (mg/dL) <span class="text-danger">*</span>
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <input type="number" class="form-control" id="glucose_level" name="glucose_level"
+                                   min="20" max="600" step="1" placeholder="es. 110"
+                                   value="{{ glucose_level if glucose_level else '' }}" required autofocus>
+                            <span class="input-group-text bg-light fw-semibold">mg/dL</span>
+                        </div>
+                        <div class="form-text text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Valori normali di riferimento:
+                            <strong>80-130 mg/dL</strong> prima dei pasti, <strong>inferiore a 180 mg/dL</strong> dopo i pasti.
+                        </div>
+                    </div>
+
+                    <!-- Meal Context -->
+                    <div class="mb-4">
+                        <label for="meal_context" class="form-label fw-bold fs-5">
+                            Momento della Rilevazione <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select form-select-lg" id="meal_context" name="meal_context" required>
+                            <option value="BEFORE_MEAL" {% if meal_context == 'BEFORE_MEAL' %}selected{% endif %}>
+                                Prima del pasto (a digiuno / pre-prandiale)
+                            </option>
+                            <option value="AFTER_MEAL" {% if meal_context == 'AFTER_MEAL' %}selected{% endif %}>
+                                Dopo il pasto (circa 2 ore dopo / post-prandiale)
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Datetime -->
+                    <div class="mb-4">
+                        <label for="reading_datetime" class="form-label fw-bold fs-5">
+                            Data e Ora della Misurazione <span class="text-danger">*</span>
+                        </label>
+                        <input type="datetime-local" class="form-control form-control-lg" id="reading_datetime"
+                               name="reading_datetime" value="{{ reading_datetime }}" required>
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('patient.dashboard') }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-arrow-left me-1"></i>Annulla
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-lg px-4 shadow-sm">
+                            <i class="bi bi-check-circle me-2"></i>Salva Rilevazione
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

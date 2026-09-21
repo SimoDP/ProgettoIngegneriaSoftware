@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Eventi Clinici e Sintomi - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Form to report new event -->
+    <div class="col-lg-5 mb-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-info text-white py-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-journal-plus me-2"></i>Segnala Evento Clinico</h4>
+                <small class="text-white-50">Sintomi, patologie insorte o terapie concomitanti</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('patient.clinical_events') }}">
+                    <div class="mb-3">
+                        <label for="event_type" class="form-label fw-bold">Tipo di Segnalazione</label>
+                        <select class="form-select form-select-lg" id="event_type" name="event_type" required>
+                            <option value="SYMPTOM">Sintomo (es. spossatezza, nausea, vertigini)</option>
+                            <option value="PATHOLOGY">Patologia concomitante (es. influenza, infezione)</option>
+                            <option value="OTHER_DRUG">Altro farmaco/terapia concomitante</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-bold">Descrizione</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"
+                                  placeholder="Descrivi dettagliatamente il sintomo o la terapia..." required></textarea>
+                    </div>
+
+                    <div class="row g-2 mb-4">
+                        <div class="col-6">
+                            <label for="start_date" class="form-label fw-bold">Data Inizio</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" required>
+                        </div>
+                        <div class="col-6">
+                            <label for="end_date" class="form-label fw-bold">Data Fine (Opz.)</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date">
+                        </div>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-info text-white btn-lg shadow-sm">
+                            <i class="bi bi-plus-circle me-1"></i>Salva Segnalazione
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- History of events -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 fw-bold text-dark"><i class="bi bi-clock-history me-2"></i>Storico Segnalazioni</h4>
+            </div>
+            <div class="card-body p-0">
+                {% if events %}
+                    <div class="list-group list-group-flush">
+                        {% for ev in events %}
+                            <div class="list-group-item p-3">
+                                <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                    <h5 class="mb-1 fw-bold">
+                                        {% if ev.event_type == 'SYMPTOM' %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-thermometer-half me-1"></i>Sintomo</span>
+                                        {% elif ev.event_type == 'PATHOLOGY' %}
+                                            <span class="badge bg-danger"><i class="bi bi-virus me-1"></i>Patologia</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary"><i class="bi bi-capsule me-1"></i>Altro Farmaco</span>
+                                        {% endif %}
+                                    </h5>
+                                    <small class="text-muted">
+                                        Periodo: <strong>{{ ev.start_date }}</strong>
+                                        {% if ev.end_date %} al <strong>{{ ev.end_date }}</strong>{% else %} (In corso){% endif %}
+                                    </small>
+                                </div>
+                                <p class="mb-2 fs-6">{{ ev.description }}</p>
+                                <form method="POST" action="{{ url_for('patient.delete_clinical_event', event_id=ev.id) }}"
+                                      onsubmit="return confirm('Sei sicuro di voler eliminare questa segnalazione?');">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">
+                                        <i class="bi bi-trash me-1"></i>Elimina
+                                    </button>
+                                </form>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center p-5 text-muted">
+                        <i class="bi bi-clipboard2-check fs-1 mb-2 d-block"></i>
+                        Nessun evento o sintomo clinico registrato.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

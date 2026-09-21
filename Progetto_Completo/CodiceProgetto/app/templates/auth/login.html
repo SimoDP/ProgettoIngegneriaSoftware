@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Accesso al Sistema - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white text-center py-3 rounded-top">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-shield-lock me-2"></i>Accesso Utente</h3>
+                <small class="text-white-50">Inserisci le tue credenziali per accedere ai servizi</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('auth.login') }}">
+                    <div class="mb-3">
+                        <label for="email" class="form-label fw-semibold">
+                            <i class="bi bi-envelope me-1"></i>Indirizzo Email
+                        </label>
+                        <input type="email" class="form-control form-control-lg" id="email" name="email"
+                               placeholder="es. mario.rossi@email.it" required autofocus>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-semibold">
+                            <i class="bi bi-key me-1"></i>Password
+                        </label>
+                        <input type="password" class="form-control form-control-lg" id="password" name="password"
+                               placeholder="Inserisci la password" required>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg shadow-sm">
+                            <i class="bi bi-box-arrow-in-right me-2"></i>Accedi
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3">
+                <small class="text-muted">
+                    Se non possiedi le credenziali, contatta l'Amministratore del servizio.
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

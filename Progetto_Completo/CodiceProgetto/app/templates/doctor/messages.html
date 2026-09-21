@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Comunicazione con {{ patient.full_name }} - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <a href="{{ url_for('doctor.patient_dossier', patient_id=patient.user_id) }}" class="btn btn-outline-secondary btn-sm">
+                &larr; Torna al Fascicolo
+            </a>
+            <h4 class="mb-0 fw-bold">Canale Messaggi: {{ patient.full_name }}</h4>
+            <span></span>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-secondary text-white py-3">
+                <h5 class="mb-0 fw-bold"><i class="bi bi-chat-dots me-2"></i>Cronologia Conversazione</h5>
+            </div>
+
+            <!-- Conversation Box -->
+            <div class="card-body p-4" style="max-height: 450px; overflow-y: auto; background-color: #fcfcfc;">
+                {% if conversation %}
+                    {% for msg in conversation %}
+                        {% set is_me = (msg.sender_id == session.get('user_id')) %}
+                        <div class="d-flex mb-3 {% if is_me %}justify-content-end{% else %}justify-content-start{% endif %}">
+                            <div class="p-3 rounded-3 shadow-sm"
+                                 style="max-width: 75%; {% if is_me %}background-color: #d1e7dd; border-bottom-right-radius: 0;{% else %}background-color: #ffffff; border: 1px solid #dee2e6; border-bottom-left-radius: 0;{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="{% if is_me %}text-success{% else %}text-primary{% endif %} me-3">
+                                        {{ msg.sender_name }}
+                                    </strong>
+                                    <small class="text-muted" style="font-size: 0.8rem;">{{ msg.sent_at }}</small>
+                                </div>
+                                <p class="mb-0 fs-6" style="white-space: pre-wrap;">{{ msg.content }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-chat-left-dots fs-1 mb-2 d-block"></i>
+                        Nessun messaggio con questo paziente.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Reply Form -->
+            <div class="card-footer bg-white p-3">
+                <form method="POST" action="{{ url_for('doctor.messages', patient_id=patient.user_id) }}">
+                    <div class="input-group">
+                        <textarea class="form-control" name="content" rows="2"
+                                  placeholder="Scrivi una risposta o indicazione per il paziente..." required></textarea>
+                        <button class="btn btn-secondary px-4 fw-bold" type="submit">
+                            <i class="bi bi-send me-1"></i>Invia Risposta
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

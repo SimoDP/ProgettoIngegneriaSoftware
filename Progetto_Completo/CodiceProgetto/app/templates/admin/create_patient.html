@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Registra Nuovo Paziente - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-person-fill-add me-2"></i>Registra Nuovo Paziente</h3>
+                <small class="text-white-50">Inserisci anagrafica e assegna il medico curante di riferimento (FR2)</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('admin.create_patient') }}">
+                    <!-- Anagrafica Base -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="first_name" class="form-label fw-semibold">Nome <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="first_name" name="first_name" required autofocus>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="last_name" class="form-label fw-semibold">Cognome <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="last_name" name="last_name" required>
+                        </div>
+                    </div>
+
+                    <!-- Credenziali -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="email" class="form-label fw-semibold">Email (Login) <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="password" class="form-label fw-semibold">Password Iniziale <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <!-- Associazione Medico Curante (FR2) -->
+                    <div class="mb-3">
+                        <label for="doctor_id" class="form-label fw-bold text-success">
+                            <i class="bi bi-hospital me-1"></i>Medico Curante di Riferimento <span class="text-danger">*</span>
+                        </label>
+                        <select class="form-select form-select-lg" id="doctor_id" name="doctor_id" required>
+                            <option value="" disabled selected>-- Seleziona un diabetologo --</option>
+                            {% for d in doctors %}
+                                <option value="{{ d.id }}">Dr. {{ d.full_name }} ({{ d.email }})</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text text-muted">
+                            Il paziente sarà assegnato a questo medico per il monitoraggio e la prescrizione.
+                        </div>
+                    </div>
+
+                    <!-- Dati Demografici -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="date_of_birth" class="form-label fw-semibold">Data di Nascita</label>
+                            <input type="date" class="form-control" id="date_of_birth" name="date_of_birth">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="gender" class="form-label fw-semibold">Genere</label>
+                            <select class="form-select" id="gender" name="gender">
+                                <option value="">Non specificato</option>
+                                <option value="M">Maschio</option>
+                                <option value="F">Femmina</option>
+                                <option value="O">Altro</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+                            Annulla
+                        </a>
+                        <button type="submit" class="btn btn-primary px-4">
+                            <i class="bi bi-check-circle me-1"></i>Registra Paziente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

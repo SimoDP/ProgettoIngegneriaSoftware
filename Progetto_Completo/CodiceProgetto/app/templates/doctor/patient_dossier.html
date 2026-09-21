@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+
+{% block title %}Fascicolo Clinico - {{ patient.full_name }} - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Fascicolo Paziente</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold"><i class="bi bi-person-vcard text-primary me-2"></i>{{ patient.full_name }}</h2>
+        <span class="text-muted fs-6">
+            Email: {{ patient.email }} &bull; Data di Nascita: {{ patient.date_of_birth or 'N/D' }} &bull; Sesso: {{ patient.gender or 'N/D' }}
+        </span>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('doctor.patient_trends', patient_id=patient.user_id) }}" class="btn btn-outline-info">
+            <i class="bi bi-graph-up me-1"></i>Andamento Glicemico
+        </a>
+        <a href="{{ url_for('doctor.manage_therapy', patient_id=patient.user_id) }}" class="btn btn-success">
+            <i class="bi bi-prescription2 me-1"></i>Gestione Terapia
+        </a>
+        <a href="{{ url_for('doctor.messages', patient_id=patient.user_id) }}" class="btn btn-outline-secondary">
+            <i class="bi bi-envelope me-1"></i>Comunicazioni
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Left Column: Risk Factors & Comorbidities (FR7 / UC7) -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-clipboard2-pulse me-2 text-danger"></i>Fattori di Rischio & Comorbilità (FR7)
+                </h5>
+                <small class="text-muted">Sezione clinica aggiornabile dal medico (con Audit Log)</small>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('doctor.update_medical_record', patient_id=patient.user_id) }}">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="is_smoker" name="is_smoker"
+                               {% if medical_record.is_smoker %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="is_smoker">
+                            <i class="bi bi-fire me-1 text-secondary"></i>Fumatore / Ex-fumatore
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="has_alcohol_issues" name="has_alcohol_issues"
+                               {% if medical_record.has_alcohol_issues %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="has_alcohol_issues">
+                            <i class="bi bi-cup-straw me-1 text-secondary"></i>Dipendenza Alcol / Stupefacenti
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" role="switch" id="has_hypertension" name="has_hypertension"
+                               {% if medical_record.has_hypertension %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="has_hypertension">
+                            <i class="bi bi-heart-pulse me-1 text-danger"></i>Ipertensione Arteriosa
+                        </label>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" role="switch" id="has_obesity" name="has_obesity"
+                               {% if medical_record.has_obesity %}checked{% endif %}>
+                        <label class="form-check-label fw-semibold" for="has_obesity">
+                            <i class="bi bi-speedometer me-1 text-warning"></i>Obesità
+                        </label>
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-outline-primary">
+                            <i class="bi bi-save me-1"></i>Salva e Traccia nel Log
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Clinical Events reported by Patient (FR3.2) -->
+        <div class="card shadow-sm border-0 mt-4">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-dark">
+                    <i class="bi bi-journal-medical me-2 text-info"></i>Sintomi & Terapie Concomitanti (FR3.2)
+                </h5>
+                <small class="text-muted">Segnalati direttamente dal paziente</small>
+            </div>
+            <div class="card-body p-0">
+                {% if clinical_events %}
+                    <ul class="list-group list-group-flush">
+                        {% for ev in clinical_events %}
+                            <li class="list-group-item p-3">
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span class="badge bg-secondary">{{ ev.event_type }}</span>
+                                    <small class="text-muted">{{ ev.start_date }} {% if ev.end_date %} - {{ ev.end_date }}{% endif %}</small>
+                                </div>
+                                <p class="mb-0 fs-6">{{ ev.description }}</p>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        Nessun evento clinico o sintomo segnalato.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Therapies and Logs -->
+    <div class="col-lg-8">
+        <!-- Active Therapies Card -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-success">
+                    <i class="bi bi-prescription2 me-2"></i>Terapie Attualmente Prescritte (FR5)
+                </h5>
+                <a href="{{ url_for('doctor.manage_therapy', patient_id=patient.user_id) }}" class="btn btn-sm btn-success">
+                    + Nuova Prescrizione
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Farmaco</th>
+                            <th>Frequenza</th>
+                            <th>Dose</th>
+                            <th>Indicazioni</th>
+                            <th>Data Inizio</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if active_therapies %}
+                            {% for t in active_therapies %}
+                                <tr>
+                                    <td><strong>{{ t.drug_name }}</strong></td>
+                                    <td>{{ t.daily_doses }} assunzioni/die</td>
+                                    <td>{{ t.quantity_per_dose }}</td>
+                                    <td>{{ t.instructions or '-' }}</td>
+                                    <td>{{ t.start_date }}</td>
+                                    <td><span class="badge bg-success">Attiva</span></td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">Nessuna terapia attiva registrata per questo paziente.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Glycemic Readings -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary">
+                    <i class="bi bi-droplet-half me-2"></i>Ultime Rilevazioni Glicemiche (FR3.1)
+                </h5>
+                <a href="{{ url_for('doctor.patient_trends', patient_id=patient.user_id) }}" class="btn btn-sm btn-outline-primary">
+                    Analisi Completa & Andamento &rarr;
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data e Ora</th>
+                            <th>Momento</th>
+                            <th>Glicemia</th>
+                            <th>Valutazione</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_readings %}
+                            {% for r in recent_readings %}
+                                <tr>
+                                    <td>{{ r.reading_datetime }}</td>
+                                    <td>{{ r.meal_context_label }}</td>
+                                    <td><strong>{{ r.glucose_level }} mg/dL</strong></td>
+                                    <td>
+                                        {% if (r.meal_context == 'BEFORE_MEAL' and (r.glucose_level < 80 or r.glucose_level > 130)) or (r.meal_context == 'AFTER_MEAL' and r.glucose_level > 180) %}
+                                            {% if r.glucose_level < 60 or r.glucose_level >= 250 %}
+                                                <span class="badge bg-danger">Critico</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Fuori Soglia</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-success">Nel Target</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Nessuna misurazione presente.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Medication Intakes -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-secondary">
+                    <i class="bi bi-clock-history me-2"></i>Registro Assunzioni del Paziente (FR4, FR6)
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data e Ora</th>
+                            <th>Farmaco</th>
+                            <th>Quantità Assunta</th>
+                            <th>Coerenza Terapia</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_intakes %}
+                            {% for i in recent_intakes %}
+                                <tr>
+                                    <td>{{ i.intake_datetime }}</td>
+                                    <td>{{ i.drug_name }}</td>
+                                    <td>{{ i.quantity_taken }}</td>
+                                    <td>
+                                        {% if i.is_consistent %}
+                                            <span class="badge bg-success">Coerente</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">Incongruente</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Nessuna assunzione registrata dal paziente.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

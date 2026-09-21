@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}Andamento Glicemico - {{ patient.full_name }} - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-1">
+                <li class="breadcrumb-item"><a href="{{ url_for('doctor.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('doctor.patient_dossier', patient_id=patient.user_id) }}">Fascicolo Paziente</a></li>
+                <li class="breadcrumb-item active">Andamento Glicemico</li>
+            </ol>
+        </nav>
+        <h2 class="fw-bold"><i class="bi bi-graph-up text-primary me-2"></i>Andamento Glicemico: {{ patient.full_name }}</h2>
+    </div>
+    <div class="btn-group shadow-sm" role="group">
+        <a href="{{ url_for('doctor.patient_trends', patient_id=patient.user_id, period='7') }}"
+           class="btn {% if days == 7 %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            Ultimi 7 Giorni (Settimanale)
+        </a>
+        <a href="{{ url_for('doctor.patient_trends', patient_id=patient.user_id, period='30') }}"
+           class="btn {% if days == 30 %}btn-primary{% else %}btn-outline-primary{% endif %}">
+            Ultimi 30 Giorni (Mensile)
+        </a>
+    </div>
+</div>
+
+<!-- Statistical Summary Cards (FR8) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Misurazioni Totali</span>
+            <h2 class="fw-bold text-dark mt-2 mb-0">{{ report.count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Media Periodo</span>
+            <h2 class="fw-bold text-primary mt-2 mb-0">{{ report.average }} <small class="fs-6 text-muted">mg/dL</small></h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Range (Min - Max)</span>
+            <h2 class="fw-bold text-secondary mt-2 mb-0">{{ report.min }} - {{ report.max }} <small class="fs-6 text-muted">mg/dL</small></h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Nel Target Clinico</span>
+            <h2 class="fw-bold text-success mt-2 mb-0">{{ report.in_target_percent }}% <small class="fs-6 text-muted">({{ report.in_target_count }}/{{ report.count }})</small></h2>
+        </div>
+    </div>
+</div>
+
+<!-- Detailed Readings in the period -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-list-check me-2"></i>Dettaglio Misurazioni nel Periodo Selezionato ({{ days }} giorni)
+        </h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Data e Ora</th>
+                    <th>Momento del Pasto</th>
+                    <th>Glicemia</th>
+                    <th>Range Atteso</th>
+                    <th>Esito</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if report.readings %}
+                    {% for r in report.readings %}
+                        <tr>
+                            <td>{{ r.reading_datetime }}</td>
+                            <td>{{ r.meal_context_label }}</td>
+                            <td><strong>{{ r.glucose_level }} mg/dL</strong></td>
+                            <td>
+                                {% if r.meal_context == 'BEFORE_MEAL' %}
+                                    80 - 130 mg/dL
+                                {% else %}
+                                    &lt; 180 mg/dL
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if (r.meal_context == 'BEFORE_MEAL' and (r.glucose_level < 80 or r.glucose_level > 130)) or (r.meal_context == 'AFTER_MEAL' and r.glucose_level > 180) %}
+                                    {% if r.glucose_level < 60 or r.glucose_level >= 250 %}
+                                        <span class="badge bg-danger">Critico</span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark">Fuori Soglia</span>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="badge bg-success">In Target</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            Nessuna misurazione registrata negli ultimi {{ days }} giorni.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Comunicazione con il Medico - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-secondary text-white py-3 d-flex justify-content-between align-items-center">
+                <div>
+                    <h4 class="mb-0 fw-bold"><i class="bi bi-envelope-paper me-2"></i>Comunicazioni con il Medico</h4>
+                    <small class="text-white-50">Messaggi diretti per Dr. {{ patient.doctor_name }}</small>
+                </div>
+                <span class="badge bg-light text-dark"><i class="bi bi-shield-check me-1"></i>Canale Protetto</span>
+            </div>
+
+            <!-- Conversation Box -->
+            <div class="card-body p-4" style="max-height: 450px; overflow-y: auto; background-color: #fcfcfc;">
+                {% if conversation %}
+                    {% for msg in conversation %}
+                        {% set is_me = (msg.sender_id == session.get('user_id')) %}
+                        <div class="d-flex mb-3 {% if is_me %}justify-content-end{% else %}justify-content-start{% endif %}">
+                            <div class="p-3 rounded-3 shadow-sm"
+                                 style="max-width: 75%; {% if is_me %}background-color: #e3f2fd; border-bottom-right-radius: 0;{% else %}background-color: #ffffff; border: 1px solid #dee2e6; border-bottom-left-radius: 0;{% endif %}">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <strong class="{% if is_me %}text-primary{% else %}text-dark{% endif %} me-3">
+                                        {{ msg.sender_name }}
+                                    </strong>
+                                    <small class="text-muted" style="font-size: 0.8rem;">{{ msg.sent_at }}</small>
+                                </div>
+                                <p class="mb-0 fs-6" style="white-space: pre-wrap;">{{ msg.content }}</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-chat-left-dots fs-1 mb-2 d-block"></i>
+                        Non ci sono ancora messaggi scambiati con il tuo medico.<br>
+                        Usa il modulo sottostante per inviare la tua prima richiesta o domanda.
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Message Input Form -->
+            <div class="card-footer bg-white p-3">
+                <form method="POST" action="{{ url_for('patient.messages') }}">
+                    <div class="input-group">
+                        <textarea class="form-control" name="content" rows="2"
+                                  placeholder="Scrivi qui la tua domanda o richiesta per il medico..." required></textarea>
+                        <button class="btn btn-secondary px-4 fw-bold" type="submit">
+                            <i class="bi bi-send me-1"></i>Invia
+                        </button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="bi bi-info-circle me-1"></i>L'invio del messaggio notifica il medico anche via email (FR11).
+                    </small>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

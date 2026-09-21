@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Gestione Terapia - {{ patient.full_name }} - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9 col-lg-7">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h3 class="mb-0 fw-bold"><i class="bi bi-prescription2 me-2"></i>Prescrizione / Aggiornamento Terapia</h3>
+                <small class="text-white-50">Paziente: {{ patient.full_name }} &bull; L'operazione verrà tracciata nell'Audit Log (FR12)</small>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" action="{{ url_for('doctor.manage_therapy', patient_id=patient.user_id) }}">
+                    <!-- Drug Name -->
+                    <div class="mb-3">
+                        <label for="drug_name" class="form-label fw-bold">
+                            Nome del Farmaco <span class="text-danger">*</span>
+                        </label>
+                        <input type="text" class="form-control form-control-lg" id="drug_name" name="drug_name"
+                               placeholder="es. Metformina, Insulina Lispro, Semaglutide..." required autofocus>
+                        <div class="form-text text-muted">
+                            Se esiste già una terapia attiva per questo farmaco, verrà aggiornata e sostituita.
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mb-3">
+                        <!-- Daily Doses -->
+                        <div class="col-md-6">
+                            <label for="daily_doses" class="form-label fw-bold">
+                                Assunzioni Giornaliere <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control form-control-lg" id="daily_doses" name="daily_doses"
+                                   min="1" max="10" placeholder="es. 2" required>
+                        </div>
+
+                        <!-- Quantity per dose -->
+                        <div class="col-md-6">
+                            <label for="quantity_per_dose" class="form-label fw-bold">
+                                Quantità per Assunzione <span class="text-danger">*</span>
+                            </label>
+                            <input type="number" class="form-control form-control-lg" id="quantity_per_dose" name="quantity_per_dose"
+                                   min="0.1" step="any" placeholder="es. 500 o 10" required>
+                        </div>
+                    </div>
+
+                    <!-- Instructions -->
+                    <div class="mb-3">
+                        <label for="instructions" class="form-label fw-bold">
+                            Indicazioni Temporali e Note
+                        </label>
+                        <input type="text" class="form-control" id="instructions" name="instructions"
+                               placeholder="es. Subito dopo i pasti principali, a stomaco pieno, lontano dai pasti...">
+                    </div>
+
+                    <!-- Start date -->
+                    <div class="mb-4">
+                        <label for="start_date" class="form-label fw-bold">
+                            Data di Inizio Validità Prescrizione
+                        </label>
+                        <input type="date" class="form-control" id="start_date" name="start_date">
+                    </div>
+
+                    <!-- Actions: Salva vs Annulla (Flusso Alt. 2.2) -->
+                    <div class="d-flex justify-content-between pt-2">
+                        <a href="{{ url_for('doctor.patient_dossier', patient_id=patient.user_id) }}" class="btn btn-outline-secondary btn-lg">
+                            <i class="bi bi-x-circle me-1"></i>Annulla (Nessuna modifica)
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg px-4 shadow-sm">
+                            <i class="bi bi-check2-circle me-1"></i>Conferma e Salva Terapia
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Currently active therapies for reference -->
+        {% if active_therapies %}
+            <div class="card shadow-sm border-0 mt-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-dark">Terapie attualmente in corso</h5>
+                </div>
+                <ul class="list-group list-group-flush">
+                    {% for t in active_therapies %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <div>
+                                <strong>{{ t.drug_name }}</strong> &bull; {{ t.daily_doses }} volte/giorno &bull; Dose: {{ t.quantity_per_dose }}
+                                {% if t.instructions %}<div class="text-muted small">{{ t.instructions }}</div>{% endif %}
+                            </div>
+                            <span class="badge bg-success">Attiva</span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

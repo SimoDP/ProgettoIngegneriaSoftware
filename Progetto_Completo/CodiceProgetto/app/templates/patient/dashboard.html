@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}Cruscotto Paziente - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2 class="fw-bold"><i class="bi bi-person-heart text-primary me-2"></i>Benvenuto, {{ session.get('full_name') }}</h2>
+        <p class="text-muted fs-5">
+            Medico curante di riferimento: <strong>Dr. {{ patient.doctor_name if patient else 'Non assegnato' }}</strong>
+        </p>
+    </div>
+    <div class="col-md-4 text-md-end align-self-center">
+        <span class="badge bg-primary fs-6 p-2"><i class="bi bi-calendar-event me-1"></i>Oggi: {{ now_date if now_date else 'Attivo' }}</span>
+    </div>
+</div>
+
+<!-- Daily Reminder Banner (FR9 / TC17) -->
+{% if daily_reminder %}
+    <div class="alert alert-warning border-warning shadow-sm d-flex align-items-center mb-4" role="alert">
+        <i class="bi bi-bell-fill fs-2 text-warning me-3"></i>
+        <div class="flex-grow-1">
+            <h5 class="alert-heading mb-1 fw-bold">Attenzione: Registrazione farmaci in sospeso</h5>
+            <p class="mb-0 fs-6">{{ daily_reminder }}</p>
+        </div>
+        <div>
+            <a href="{{ url_for('patient.add_intake') }}" class="btn btn-warning fw-bold">
+                <i class="bi bi-capsule me-1"></i>Registra Ora
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Quick Action Buttons for High Usability (NFR3) -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-primary bg-primary bg-opacity-10 text-center p-3">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <i class="bi bi-droplet-fill text-primary fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Glicemia</h5>
+                    <p class="text-muted small">Registra i valori prima o dopo i pasti</p>
+                </div>
+                <a href="{{ url_for('patient.add_measurement') }}" class="btn btn-primary mt-2">
+                    <i class="bi bi-plus-lg me-1"></i>Nuova Rilevazione
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-success bg-success bg-opacity-10 text-center p-3">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <i class="bi bi-capsule text-success fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Assunzione Farmaci</h5>
+                    <p class="text-muted small">Registra la dose e il farmaco assunto</p>
+                </div>
+                <a href="{{ url_for('patient.add_intake') }}" class="btn btn-success mt-2">
+                    <i class="bi bi-check-lg me-1"></i>Registra Farmaco
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-info bg-info bg-opacity-10 text-center p-3">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <i class="bi bi-activity text-info fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Sintomi & Eventi</h5>
+                    <p class="text-muted small">Segnala nausea, mal di testa o altre terapie</p>
+                </div>
+                <a href="{{ url_for('patient.clinical_events') }}" class="btn btn-info text-white mt-2">
+                    <i class="bi bi-journal-plus me-1"></i>Segnala Evento
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 col-lg-3">
+        <div class="card h-100 border-secondary bg-secondary bg-opacity-10 text-center p-3">
+            <div class="card-body d-flex flex-column justify-content-between">
+                <div>
+                    <i class="bi bi-chat-dots text-secondary fs-1 mb-2"></i>
+                    <h5 class="fw-bold">Contatta Medico</h5>
+                    <p class="text-muted small">Invia un'email al tuo diabetologo curante</p>
+                </div>
+                <a href="{{ url_for('patient.messages') }}" class="btn btn-secondary mt-2">
+                    <i class="bi bi-envelope me-1"></i>Invia Messaggio
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Active Therapies Column -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 fw-bold text-primary">
+                    <i class="bi bi-prescription2 me-2"></i>Terapie Prescritte Attive
+                </h5>
+            </div>
+            <div class="card-body p-0">
+                {% if active_therapies %}
+                    <ul class="list-group list-group-flush">
+                        {% for t in active_therapies %}
+                            <li class="list-group-item p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                    <h6 class="mb-0 fw-bold fs-5 text-dark">{{ t.drug_name }}</h6>
+                                    <span class="badge bg-primary">{{ t.daily_doses }} volte al giorno</span>
+                                </div>
+                                <p class="mb-1 text-muted">Dose: <strong>{{ t.quantity_per_dose }}</strong></p>
+                                {% if t.instructions %}
+                                    <p class="mb-0 text-secondary small"><i class="bi bi-info-circle me-1"></i>{{ t.instructions }}</p>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="p-4 text-center text-muted">
+                        <i class="bi bi-inbox fs-2 mb-2 d-block"></i>
+                        Nessuna terapia attiva registrata al momento.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Readings & Intakes Column -->
+    <div class="col-lg-7">
+        <!-- Recent Glycemic Readings -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary">
+                    <i class="bi bi-graph-up me-2"></i>Ultime Rilevazioni Glicemiche
+                </h5>
+                <a href="{{ url_for('patient.add_measurement') }}" class="btn btn-sm btn-outline-primary">
+                    + Aggiungi
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data e Ora</th>
+                            <th>Momento</th>
+                            <th>Valore</th>
+                            <th>Stato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_readings %}
+                            {% for r in recent_readings %}
+                                <tr>
+                                    <td>{{ r.reading_datetime }}</td>
+                                    <td>{{ r.meal_context_label }}</td>
+                                    <td><strong>{{ r.glucose_level }} mg/dL</strong></td>
+                                    <td>
+                                        {% if (r.meal_context == 'BEFORE_MEAL' and (r.glucose_level < 80 or r.glucose_level > 130)) or (r.meal_context == 'AFTER_MEAL' and r.glucose_level > 180) %}
+                                            {% if r.glucose_level < 60 or r.glucose_level >= 250 %}
+                                                <span class="badge bg-danger">Critico</span>
+                                            {% else %}
+                                                <span class="badge bg-warning text-dark">Fuori Soglia</span>
+                                            {% endif %}
+                                        {% else %}
+                                            <span class="badge bg-success">Normale</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Nessuna rilevazione recente.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Recent Intakes -->
+        <div class="card shadow-sm">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-success">
+                    <i class="bi bi-clock-history me-2"></i>Ultime Assunzioni Registrate
+                </h5>
+                <a href="{{ url_for('patient.add_intake') }}" class="btn btn-sm btn-outline-success">
+                    + Registra
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Data e Ora</th>
+                            <th>Farmaco</th>
+                            <th>Quantità</th>
+                            <th>Coerenza</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_intakes %}
+                            {% for i in recent_intakes %}
+                                <tr>
+                                    <td>{{ i.intake_datetime }}</td>
+                                    <td><strong>{{ i.drug_name }}</strong></td>
+                                    <td>{{ i.quantity_taken }}</td>
+                                    <td>
+                                        {% if i.is_consistent %}
+                                            <span class="badge bg-success"><i class="bi bi-check me-1"></i>Coerente</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark"><i class="bi bi-exclamation-triangle me-1"></i>Discostata</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Nessuna assunzione recente.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

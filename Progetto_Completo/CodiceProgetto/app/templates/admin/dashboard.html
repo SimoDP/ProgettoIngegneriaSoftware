@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Pannello Amministratore - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold"><i class="bi bi-gear-fill text-primary me-2"></i>Pannello Amministrazione Servizio</h2>
+        <p class="text-muted fs-5 mb-0">Configurazione Iniziale Utenze e Gestione di Sistema (FR2 / UC5)</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('admin.create_doctor') }}" class="btn btn-success me-2">
+            <i class="bi bi-person-plus me-1"></i>+ Medico
+        </a>
+        <a href="{{ url_for('admin.create_patient') }}" class="btn btn-primary">
+            <i class="bi bi-person-fill-add me-1"></i>+ Paziente
+        </a>
+    </div>
+</div>
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Medici Diabetologi Registrati</span>
+            <h2 class="fw-bold text-success mt-2 mb-0">{{ doctors|length }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Pazienti nel Sistema</span>
+            <h2 class="fw-bold text-primary mt-2 mb-0">{{ patients|length }}</h2>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0 text-center p-3">
+            <span class="text-muted fw-semibold">Audit Log Totali Registrati</span>
+            <h2 class="fw-bold text-dark mt-2 mb-0">{{ logs|length }}</h2>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Doctors Table -->
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-success">
+                    <i class="bi bi-person-badge me-2"></i>Medici Specialisti
+                </h5>
+                <a href="{{ url_for('admin.create_doctor') }}" class="btn btn-sm btn-outline-success">
+                    + Aggiungi
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if doctors %}
+                            {% for d in doctors %}
+                                <tr>
+                                    <td><strong>Dr. {{ d.full_name }}</strong></td>
+                                    <td>{{ d.email }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="2" class="text-center text-muted py-4">Nessun medico presente.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patients Table with Doctor Association -->
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold text-primary">
+                    <i class="bi bi-people me-2"></i>Pazienti & Medico Assegnato (FR2)
+                </h5>
+                <a href="{{ url_for('admin.create_patient') }}" class="btn btn-sm btn-outline-primary">
+                    + Registra Paziente
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Paziente</th>
+                            <th>Email</th>
+                            <th>Data Nascita</th>
+                            <th>Medico Curante</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if patients %}
+                            {% for p in patients %}
+                                <tr>
+                                    <td><strong>{{ p.full_name }}</strong></td>
+                                    <td>{{ p.email }}</td>
+                                    <td>{{ p.date_of_birth or '-' }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-dark border">
+                                            Dr. {{ p.doctor_name }}
+                                        </span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">Nessun paziente registrato.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Global Audit Logs -->
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-shield-lock me-2"></i>Ultime Operazioni Cliniche Tracciate (NFR2 Audit)
+        </h5>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-sm btn-outline-secondary">
+            Vedi Tutti &rarr;
+        </a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Medico</th>
+                    <th>Azione</th>
+                    <th>Paziente</th>
+                    <th>Dettagli</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for l in logs %}
+                        <tr>
+                            <td><code>{{ l.timestamp }}</code></td>
+                            <td><strong>Dr. {{ l.doctor_name }}</strong></td>
+                            <td><span class="badge bg-secondary">{{ l.action }}</span></td>
+                            <td>{{ l.patient_name or '-' }}</td>
+                            <td>{{ l.details or '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">Nessun log presente.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

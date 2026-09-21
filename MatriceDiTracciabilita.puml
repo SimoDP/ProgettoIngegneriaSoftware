@@ -1,0 +1,28 @@
+@startuml
+skinparam monochrome true
+skinparam shadowing false
+skinparam defaultFontName Helvetica
+skinparam defaultFontSize 11
+
+card "Matrice di Tracciabilità dei Requisiti (Fase 4 - Requirements Engineering)" as MatrixCard {
+| **Requisito** | **Use Case** | **Internal Design (Classi / Servizi)** | **Code (File / Moduli Sorgente)** | **Tests (Test Case)** |
+| **FR1** (Autenticazione & Ruoli) | UC4 (Autenticazione al sistema) | AuthController, AuthService, UserDAO, User | app/controllers/AuthController.py\napp/services/AuthService.py\napp/daos/UserDAO.py | TC01, TC02 |
+| **FR2** (Configurazione Utenze) | UC5 (Configurazione Iniziale Utenze) | AdminController, PatientService, PatientDAO, UserDAO | app/controllers/AdminController.py\napp/services/PatientService.py\napp/daos/PatientDAO.py | TC03 |
+| **FR3.1** (Rilevazioni Glicemia) | UC1 (Registra Rilevazione Glicemica) | PatientController, MeasurementService, MeasurementDAO | app/controllers/PatientController.py\napp/services/MeasurementService.py\napp/daos/MeasurementDAO.py | TC04, TC05, TC06, TC07 |
+| **FR3.2** (Eventi Clinici Concomitanti) | UC6 (Segnalazione Eventi Clinici Concomitanti) | PatientController, ClinicalEventDAO, ClinicalEvent | app/controllers/PatientController.py\napp/daos/ClinicalEventDAO.py\napp/models/ClinicalEvent.py | TC08 |
+| **FR4** (Diario Assunzioni Farmaci) | UC3 (Registra Assunzione Farmaco) | PatientController, MedicationIntakeDAO, MedicationIntake | app/controllers/PatientController.py\napp/daos/MedicationIntakeDAO.py\napp/models/MedicationIntake.py | TC09, TC10, TC11 |
+| **FR5** (Gestione Terapie Medico) | UC2 (Gestione Terapia) | DoctorController, TherapyService, TherapyDAO, Therapy | app/controllers/DoctorController.py\napp/services/TherapyService.py\napp/daos/TherapyDAO.py | TC12, TC13, TC14 |
+| **FR6** (Verifica Coerenza Farmaco/Dose) | MostraAvvisoIncoerenza (extend UC3) | TherapyService, AlertDAO, Alert | app/services/TherapyService.py\napp/daos/AlertDAO.py\napp/models/Alert.py | TC09, TC10 |
+| **FR7** (Fascicolo Clinico Paziente) | UC7 (Aggiornamento Fascicolo Paziente) | DoctorController, MedicalRecordService, MedicalRecordDAO | app/controllers/DoctorController.py\napp/services/MedicalRecordService.py\napp/daos/MedicalRecordDAO.py | TC15 |
+| **FR8** (Andamento Clinico & Trend) | UC8 (Visualizzazione Andamento Clinico) | DoctorController, MeasurementService, MeasurementDAO | app/controllers/DoctorController.py\napp/services/MeasurementService.py\napp/daos/MeasurementDAO.py | TC16 |
+| **FR9** (Alert Promemoria Paziente) | Background / Reminder (Alert mancata registrazione) | TherapyService, AlertDAO, Alert | app/services/TherapyService.py\napp/daos/AlertDAO.py\napp/templates/patient/dashboard.html | TC17 |
+| **FR10** (Alert Soglie Glicemiche Medico) | InviaNotificaAllarmeGlicemia (extend UC1) | MeasurementService, AlertService, AlertDAO, MessageService | app/services/MeasurementService.py\napp/services/AlertService.py\napp/daos/AlertDAO.py | TC05, TC06 |
+| **FR11** (Comunicazioni Medico-Paziente) | UC9 (Invio Comunicazioni E-mail) | MessageService, MessageDAO, Message | app/services/MessageService.py\napp/daos/MessageDAO.py\napp/models/Message.py | TC19 |
+| **FR12** (Audit Trail Medico-Legale) | RegistraAuditLog (include UC2, UC7) | AuditService, AuditLogDAO, AuditLog | app/services/AuditService.py\napp/daos/AuditLogDAO.py\napp/models/AuditLog.py | TC12, TC15, TC20 |
+| **FR13** (Alert Mancata Aderenza > 3gg) | Background / Cron (Alert mancata aderenza) | TherapyService, AlertService, AlertDAO | app/services/TherapyService.py\napp/services/AlertService.py\napp/daos/AlertDAO.py | TC09, TC18 |
+| **NFR1** (Architettura OO, Web, SQLite) | Requisito Architetturale di Piattaforma | DatabaseManager, Flask Application Factory | app/database/DatabaseManager.py\napp/database/schema.sql\napp/__init__.py | TC22 |
+| **NFR2** (Integrità & Audit Immutabile) | Requisito di Sicurezza Medico-Legale | AuditLogDAO (Append-Only Pattern, No Update/Delete) | app/daos/AuditLogDAO.py\napp/services/AuditService.py | TC20 |
+| **NFR3** (Usabilità & Accessibilità Anziani) | Requisito di Interfaccia Utente (UI/UX) | Jinja2 Templates, Bootstrap 5 (High-contrast, Large UI) | app/templates/base.html\napp/templates/patient/ | TC21 |
+| **NFR4** (Riservatezza & Controllo Accessi) | Requisito di Sicurezza & Autorizzazione | auth_decorators (@login_required, @role_required) | app/controllers/auth_decorators.py\napp/services/AuthService.py | TC01, TC02 |
+}
+@enduml

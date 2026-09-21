@@ -1,0 +1,32 @@
+CORRETTO
+def __init__(self, db_path: Optional[str] = None):
+          if db_path is not None and hasattr(self, 'db_path') and self.db_path != db_path:
+              # Se viene passato un percorso diverso (es. ambiente di test), aggiorna e chiudi la vecchia connessione
+              self.close_connection()
+              self.db_path = db_path
+
+          if self._initialized:
+              return
+
+          # Default database path
+          if db_path is None:
+              base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+              self.db_path = os.path.join(base_dir, 'database', 'telemedicine.db')
+          else:
+              self.db_path = db_path
+
+          self._local = threading.local()
+          self._initialized = True
+
+
+SBAGLIATO PER I TEST
+    def init_db(self, schema_path: Optional[str] = None):           
+          """Initializes database schema from schema.sql."""                                                       
+          if schema_path is None:                                                                                  
+              schema_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'schema.sql')                 
+          with open(schema_path, 'r', encoding='utf-8') as f:                                                      
+              schema_script = f.read()                                                                             
+          conn = self.get_connection()                                                                             
+          cursor = conn.cursor()                                                                                   
+          cursor.executescript(schema_script)                                                                      
+          conn.commit()

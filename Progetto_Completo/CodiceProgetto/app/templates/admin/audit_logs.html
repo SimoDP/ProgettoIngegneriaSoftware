@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Trail Globale - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold"><i class="bi bi-shield-lock text-primary me-2"></i>Audit Trail Globale del Sistema</h2>
+        <p class="text-muted mb-0">Registro inalterabile (Append-Only) di tutte le operazioni cliniche eseguite (FR12 / NFR2)</p>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+        &larr; Torna alla Dashboard Admin
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-list-columns me-2"></i>Tutte le Operazioni Tracciate ({{ logs|length }})
+        </h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>Medico Responsabile</th>
+                    <th>Operazione</th>
+                    <th>Paziente Interessato</th>
+                    <th>Dettagli Operazione</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for l in logs %}
+                        <tr>
+                            <td>#{{ l.id }}</td>
+                            <td><code>{{ l.timestamp }}</code></td>
+                            <td><strong>Dr. {{ l.doctor_name }}</strong></td>
+                            <td><span class="badge bg-secondary">{{ l.action }}</span></td>
+                            <td>{{ l.patient_name or '-' }}</td>
+                            <td>{{ l.details or '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            Nessuna operazione registrata nel log di audit.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

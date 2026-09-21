@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Medico - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+        <h2 class="fw-bold"><i class="bi bi-hospital text-primary me-2"></i>Pannello di Controllo Medico</h2>
+        <p class="text-muted fs-5 mb-0">Dr. {{ session.get('full_name') }} &bull; Monitoraggio Pazienti e Allarmi Clinici</p>
+    </div>
+    <div class="col-md-4 text-md-end">
+        <a href="{{ url_for('doctor.audit_logs') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-shield-check me-1"></i>Mio Registro Audit
+        </a>
+    </div>
+</div>
+
+<!-- Section 1: Active Clinical Alerts (FR10, FR13) -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <h4 class="mb-0 fw-bold text-danger">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>Allarmi Clinici e di Aderenza Aperti
+        </h4>
+        <span class="badge bg-danger rounded-pill fs-6">{{ alerts|length }} Attivi</span>
+    </div>
+    <div class="card-body p-0">
+        {% if alerts %}
+            <div class="list-group list-group-flush">
+                {% for a in alerts %}
+                    <div class="list-group-item p-3 d-flex justify-content-between align-items-center {% if a.severity == 'CRITICAL' %}bg-danger bg-opacity-10{% else %}bg-warning bg-opacity-10{% endif %}">
+                        <div>
+                            <div class="d-flex align-items-center mb-1">
+                                {% if a.severity == 'CRITICAL' %}
+                                    <span class="badge bg-danger me-2"><i class="bi bi-radioactive me-1"></i>CRITICO</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark me-2"><i class="bi bi-exclamation-circle me-1"></i>ATTENZIONE</span>
+                                {% endif %}
+                                <strong class="fs-5 text-dark">Paziente: {{ a.patient_name }}</strong>
+                                <small class="text-muted ms-3"><i class="bi bi-clock me-1"></i>{{ a.created_at }}</small>
+                            </div>
+                            <p class="mb-1 text-dark fs-6">{{ a.message }}</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('doctor.patient_dossier', patient_id=a.patient_id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-folder2-open me-1"></i>Fascicolo
+                            </a>
+                            <form method="POST" action="{{ url_for('doctor.resolve_alert', alert_id=a.id) }}">
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="bi bi-check2-circle me-1"></i>Risolvi
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="p-4 text-center text-muted">
+                <i class="bi bi-check-circle-fill fs-2 text-success mb-2 d-block"></i>
+                Ottimo! Nessun allarme o valore anomalo in sospeso.
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Section 2: Assigned Patients List -->
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h4 class="mb-0 fw-bold text-primary">
+            <i class="bi bi-people-fill me-2"></i>Pazienti Assegnati in Cura ({{ patients|length }})
+        </h4>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nome Paziente</th>
+                    <th>Email</th>
+                    <th>Data di Nascita</th>
+                    <th>Genere</th>
+                    <th class="text-end">Azioni Rapide</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if patients %}
+                    {% for p in patients %}
+                        <tr>
+                            <td>
+                                <strong>{{ p.full_name }}</strong>
+                            </td>
+                            <td>{{ p.email }}</td>
+                            <td>{{ p.date_of_birth if p.date_of_birth else '-' }}</td>
+                            <td>
+                                {% if p.gender == 'M' %}Maschio
+                                {% elif p.gender == 'F' %}Femmina
+                                {% else %}{{ p.gender or '-' }}{% endif %}
+                            </td>
+                            <td class="text-end">
+                                <a href="{{ url_for('doctor.patient_dossier', patient_id=p.user_id) }}" class="btn btn-sm btn-primary">
+                                    <i class="bi bi-folder2 me-1"></i>Fascicolo Clinico
+                                </a>
+                                <a href="{{ url_for('doctor.patient_trends', patient_id=p.user_id) }}" class="btn btn-sm btn-outline-info">
+                                    <i class="bi bi-graph-up me-1"></i>Andamento
+                                </a>
+                                <a href="{{ url_for('doctor.manage_therapy', patient_id=p.user_id) }}" class="btn btn-sm btn-outline-success">
+                                    <i class="bi bi-capsule me-1"></i>Terapia
+                                </a>
+                                <a href="{{ url_for('doctor.messages', patient_id=p.user_id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-envelope me-1"></i>Messaggi
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            Nessun paziente attualmente assegnato al tuo profilo.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

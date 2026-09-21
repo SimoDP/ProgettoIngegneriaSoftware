@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Mio Registro Operazioni (Audit Log) - TeleDiabete{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold"><i class="bi bi-shield-check text-primary me-2"></i>Mio Registro Operazioni (Audit Trail)</h2>
+        <p class="text-muted mb-0">Tracciamento inalterabile delle operazioni cliniche effettuate (FR12 / NFR2)</p>
+    </div>
+    <a href="{{ url_for('doctor.dashboard') }}" class="btn btn-outline-secondary">
+        &larr; Torna alla Dashboard
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 fw-bold text-dark">
+            <i class="bi bi-journal-text me-2"></i>Cronologia Operazioni Medico-Legali (Append-Only)
+        </h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Tipo Azione</th>
+                    <th>Paziente Interessato</th>
+                    <th>Dettagli Operazione</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if logs %}
+                    {% for log in logs %}
+                        <tr>
+                            <td><code>{{ log.timestamp }}</code></td>
+                            <td>
+                                <span class="badge bg-secondary">{{ log.action }}</span>
+                            </td>
+                            <td>
+                                {% if log.patient_name %}
+                                    <strong>{{ log.patient_name }}</strong>
+                                {% else %}
+                                    <span class="text-muted">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ log.details or '-' }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-5">
+                            Nessuna operazione registrata nel log.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
